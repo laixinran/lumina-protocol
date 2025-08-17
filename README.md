@@ -5,7 +5,8 @@ Cross-chain luminous messaging with commemorative NFTs via Hyperlane
 
 ## Overview
 Lumina Protocol is a cross-chain social communication platform that enables users to send emotionally-resonant messages across different blockchain networks while automatically minting commemorative NFTs upon successful delivery. Built on Hyperlane's interoperability infrastructure, Lumina transforms traditional messaging into a meaningful, permanent, and cross-chain social experience that connects communities across blockchain boundaries.
-Features
+
+### Features
 
 - 🌉 Cross-Chain Messaging: Send messages from Base Sepolia to Ethereum Sepolia using Hyperlane
 - 💫 Emotional Resonance: Choose from 6 resonance types (Love, Bliss, Serenity, Luminosity, Eternity, Grace)
@@ -22,25 +23,25 @@ Choose an emotional resonance type
 Send across chains via Hyperlane infrastructure
 Receive automatic NFT confirmation on Ethereum Sepolia
 
-Base Sepolia Contract: 0x5b254C65D9A640cDF74f52D08BA88EF880Edb69D
-Ethereum Sepolia Contract: 0x7742eE5b44B54A63E4aCadb37Ca217786003A4fC
+- Base Sepolia Contract: 0x5b254C65D9A640cDF74f52D08BA88EF880Edb69D
+- Ethereum Sepolia Contract: 0x7742eE5b44B54A63E4aCadb37Ca217786003A4fC
 
 ## Technical Architecture
 ### Smart Contracts
-Solidity: ^0.8.20
-OpenZeppelin: ERC721, Ownable, Base64, Strings
-Hyperlane: Cross-chain messaging via IMailbox interface
+- Solidity: ^0.8.20
+- OpenZeppelin: ERC721, Ownable, Base64, Strings
+- Hyperlane: Cross-chain messaging via IMailbox interface
 
 ### Frontend
-Vanilla JavaScript with Ethers.js v5.7.2
-Responsive Design with custom CSS
-MetaMask Integration with automatic network switching
+- Vanilla JavaScript with Ethers.js v5.7.2
+- Responsive Design with custom CSS
+- MetaMask Integration with automatic network switching
 
 ### Infrastructure
-Base Sepolia (Source Chain)
-Ethereum Sepolia (Destination Chain)
-Hyperlane Cross-chain messaging protocol
-Alchemy RPC providers
+- Base Sepolia (Source Chain)
+- Ethereum Sepolia (Destination Chain)
+- Hyperlane Cross-chain messaging protocol
+- Alchemy RPC providers
 
 ## Roadmap
 
