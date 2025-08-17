@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina Protocol - Cross-Chain Luminous Messaging</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            padding: 20px;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #000000;
+            border: 2px solid #ffffff;
+            border-radius: 0;
+            padding: 30px;
+            box-shadow: none;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: normal;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #cccccc;
+            margin-bottom: 40px;
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        .form-section {
+            background: #000000;
+            padding: 25px;
+            border: 1px solid #ffffff;
+            border-radius: 0;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: normal;
+            color: #ffffff;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        select, textarea, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ffffff;
+            border-radius: 0;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: #000000;
+            color: #ffffff;
+        }
+
+        select:focus, textarea:focus, input:focus {
+            outline: none;
+            border-color: #cccccc;
+            box-shadow: none;
+        }
+
+        textarea {
+            height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        ::placeholder {
+            color: #666666;
+        }
+
+        .emotion-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .emotion-btn {
+            padding: 10px;
+            border: 1px solid #ffffff;
+            background: #000000;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .emotion-btn:hover {
+            border-color: #ffffff;
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .emotion-btn.active {
+            border-color: #ffffff;
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .send-button {
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #ffffff;
+            padding: 15px 40px;
+            border-radius: 0;
+            font-size: 18px;
+            font-weight: normal;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .send-button:hover {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .send-button:disabled {
+            background: #333333;
+            color: #666666;
+            border-color: #333333;
+            cursor: not-allowed;
+        }
+
+        .messages-section {
+            margin-top: 40px;
+        }
+
+        .message-card {
+            background: #000000;
+            border: 1px solid #ffffff;
+            border-radius: 0;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: none;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .emotion-tag {
+            background: #ffffff;
+            color: #000000;
+            padding: 4px 12px;
+            border-radius: 0;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .message-time {
+            color: #cccccc;
+            font-size: 12px;
+        }
+
+        .message-content {
+            color: #ffffff;
+            line-height: 1.6;
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 0;
+            margin: 20px 0;
+            font-weight: normal;
+            border: 1px solid;
+        }
+
+        .status.success {
+            background: #000000;
+            color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        .status.error {
+            background: #000000;
+            color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        .status.loading {
+            background: #000000;
+            color: #ffffff;
+            border-color: #ffffff;
+        }
+
+        .connect-wallet {
+            background: #000000;
+            color: #ffffff;
+            border: 1px solid #ffffff;
+            padding: 12px 30px;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .connect-wallet:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .connect-wallet:disabled {
+            background: #333333;
+            color: #666666;
+            border-color: #333333;
+            cursor: not-allowed;
+        }
+
+        .chain-info {
+            display: flex;
+            justify-content: space-between;
+            background: #000000;
+            border: 1px solid #ffffff;
+            padding: 15px;
+            border-radius: 0;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .chain-badge {
+            background: #ffffff;
+            color: #000000;
+            padding: 5px 15px;
+            border-radius: 0;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nft-image {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ffffff;
+            margin-top: 15px;
+        }
+
+        .contract-info {
+            background: #000000;
+            border: 1px solid #ffffff;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .loading {
+            display: inline-block;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .debug-info {
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 11px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LUMINA</h1>
+        <p class="subtitle">Illuminating hearts across the multiverse</p>
+
+        <div class="contract-info">
+            <div><strong>BASE SEPOLIA:</strong> 0x5b254C65D9A640cDF74f52D08BA88EF880Edb69D</div>
+            <div><strong>ETHEREUM SEPOLIA:</strong> 0x7742eE5b44B54A63E4aCadb37Ca217786003A4fC</div>
+            <div><strong>STATUS:</strong> <span id="contractStatus">Checking...</span></div>
+        </div>
+
+        <!-- Debug信息已移除，界面更简洁 -->
+
+        <div class="chain-info">
+            <div>
+                <strong>SOURCE CHAIN:</strong> <span class="chain-badge">Base Sepolia</span>
+            </div>
+            <div>
+                <strong>DESTINATION CHAIN:</strong> <span class="chain-badge">Ethereum Sepolia</span>
+            </div>
+        </div>
+
+        <button id="connectWallet" class="connect-wallet">Connect Wallet</button>
+        <div id="walletInfo" style="display:none; margin-bottom: 20px; color: #cccccc;">
+            <strong>WALLET:</strong> <span id="walletAddress"></span>
+        </div>
+
+        <div class="form-section">
+            <h3 style="margin-bottom: 20px; color: #ffffff; text-transform: uppercase; letter-spacing: 2px; font-weight: normal;">Transmit Luminous Message</h3>
+            
+            <div class="form-group">
+                <label>Select Resonance Type:</label>
+                <div class="emotion-buttons">
+                    <button class="emotion-btn" data-emotion="love">LOVE</button>
+                    <button class="emotion-btn" data-emotion="bliss">BLISS</button>
+                    <button class="emotion-btn" data-emotion="serenity">SERENITY</button>
+                    <button class="emotion-btn" data-emotion="luminosity">LUMINOSITY</button>
+                    <button class="emotion-btn" data-emotion="eternity">ETERNITY</button>
+                    <button class="emotion-btn" data-emotion="grace">GRACE</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="messageContent">Luminous Content:</label>
+                <textarea 
+                    id="messageContent" 
+                    placeholder="Channel your light into words...&#10;&#10;Let your essence flow across the multiverse."
+                    maxlength="280"
+                ></textarea>
+                <small style="color: #666666;">Max 280 characters | <span id="charCount">0</span>/280</small>
+            </div>
+            <!--
+            <div class="form-group">
+                <label for="messageTag">Message Tag (Optional):</label>
+                <input 
+                    type="text" 
+                    id="messageTag" 
+                    placeholder="Add a personal tag or note for this message..."
+                    maxlength="50"
+                >
+                <small style="color: #666666;">Personal reference only - not stored on blockchain</small>
+            </div>
+        -->
+
+            <button id="sendMessage" class="send-button" disabled>
+                Illuminate
+            </button>
+        </div>
+
+        <div id="status"></div>
+
+        <div class="messages-section">
+            <h3 style="margin-bottom: 20px; color: #ffffff; text-transform: uppercase; letter-spacing: 2px; font-weight: normal;">Luminous Messages</h3>
+            <div id="messagesList">
+                <p style="text-align: center; color: #666666;">No luminous messages yet...</p>
+            </div>
+        </div>
+
+        <div class="messages-section">
+            <h3 style="margin-bottom: 20px; color: #ffffff; text-transform: uppercase; letter-spacing: 2px; font-weight: normal;">Your Commemorative NFTs</h3>
+            <div id="nftsList">
+                <p style="text-align: center; color: #666666;">No commemorative NFTs yet...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let provider, signer, contract;
+        let selectedEmotion = '';
+        let isConnecting = false;
+        
+       
+        const BASE_SEPOLIA_CONFIG = {
+            chainId: 84532,
+            contractAddress: "0x5b254C65D9A640cDF74f52D08BA88EF880Edb69D", // Base Sepolia
+            mailboxAddress: "0x6966b0E55883d49BFB24539356a2f8A673E02039",
+            domain: 84532
+        };
+        
+        const ETHEREUM_SEPOLIA_CONFIG = {
+            chainId: 11155111,
+            contractAddress: "0x7742eE5b44B54A63E4aCadb37Ca217786003A4fC", // Ethereum Sepolia
+            mailboxAddress: "0xfFAEF09B3cd11D9b20d1a19bECca54EEC2884766",
+            domain: 11155111
+        };
+        
+        // 当前使用的配置
+        const CONTRACT_ADDRESS = BASE_SEPOLIA_CONFIG.contractAddress;
+        const MAILBOX_ADDRESS = BASE_SEPOLIA_CONFIG.mailboxAddress;
+        const SEPOLIA_DOMAIN = ETHEREUM_SEPOLIA_CONFIG.domain;
+        const BASE_CHAIN_ID = BASE_SEPOLIA_CONFIG.chainId;
+        
+        // 完整的ABI - 包含事件和Transfer事件
+        const CONTRACT_ABI = [
+            "function illuminate(uint32 destinationDomain, bytes32 recipient, string calldata content, string calldata resonance) external payable",
+            "function getAllLights() external view returns (tuple(address sender, string content, uint256 timestamp, string resonance, bytes32 essence, bool crossChainConfirmed, uint256 nftTokenId, uint32 destinationDomain, uint32 originDomain)[])",
+            "function getUserNFTs(address user) external view returns (uint256[])",
+            "function tokenURI(uint256 tokenId) external view returns (string)",
+            "function ownerOf(uint256 tokenId) external view returns (address)",
+            "function messageCount() external view returns (uint256)",
+            "function totalSupply() external view returns (uint256)",
+            "function balanceOf(address owner) external view returns (uint256)",
+            "function isMessageConfirmed(uint256 messageId) external view returns (bool)",
+            "function crossChainContracts(uint32 domain) external view returns (bytes32)",
+            "function messages(uint256 messageId) external view returns (tuple(address sender, string content, uint256 timestamp, string resonance, bytes32 essence, bool crossChainConfirmed, uint256 nftTokenId, uint32 destinationDomain, uint32 originDomain))",
+            "function luminousNFTs(uint256 tokenId) external view returns (tuple(uint256 messageId, string resonance, uint256 timestamp, bytes32 essence, bool isCommemorative))",
+            "event LightSent(uint256 indexed messageId, address indexed sender, string content, string resonance, uint32 destinationDomain)",
+            "event CommemorativeNFTMinted(uint256 indexed tokenId, uint256 indexed messageId, address indexed recipient, string resonance)",
+            "event LightReceived(uint256 indexed messageId, address indexed sender, bytes32 essence)",
+            "event CrossChainConfirmed(bytes32 indexed essence, uint256 indexed messageId)",
+            "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
+        ];
+
+        
+        function debugLog(message) {
+            // console.log('LUMINA:', message);
+        }
+
+        
+        window.addEventListener('load', async () => {
+            debugLog('Page loaded - Lumina Protocol Enhanced Version');
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            debugLog('window.ethereum exists: ' + (typeof window.ethereum !== 'undefined'));
+            debugLog('ethers loaded: ' + (typeof ethers !== 'undefined'));
+            
+            if (typeof ethers === 'undefined') {
+                debugLog('❌ Ethers.js failed to load, trying alternative...');
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js';
+                script.onload = () => {
+                    debugLog('✅ Ethers.js loaded from backup CDN');
+                    checkContractStatus();
+                };
+                script.onerror = () => {
+                    debugLog('❌ Failed to load ethers from backup CDN');
+                };
+                document.head.appendChild(script);
+            } else {
+                await checkContractStatus();
+            }
+            
+            await checkMetaMask();
+        });
+
+        // MetaMask检测
+        async function checkMetaMask() {
+            debugLog('Checking for MetaMask...');
+            
+            if (typeof window.ethereum !== 'undefined') {
+                debugLog('✅ window.ethereum detected');
+                
+                if (window.ethereum.isMetaMask) {
+                    debugLog('✅ MetaMask confirmed');
+                    
+                    try {
+                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                        debugLog(`Found ${accounts.length} connected accounts`);
+                        if (accounts.length > 0) {
+                            debugLog('Already connected to: ' + accounts[0]);
+                            setTimeout(() => connectWallet(), 2000);
+                        } else {
+                            debugLog('MetaMask ready for connection');
+                            updateConnectionUI(true);
+                        }
+                    } catch (error) {
+                        debugLog('Error checking accounts: ' + error.message);
+                        updateConnectionUI(true);
+                    }
+                } else {
+                    debugLog('⚠️ Ethereum provider is not MetaMask');
+                    updateConnectionUI(true);
+                }
+                
+            } else {
+                debugLog('❌ window.ethereum not found');
+                await waitForMetaMask();
+            }
+        }
+        
+        async function waitForMetaMask() {
+            debugLog('Waiting for MetaMask injection...');
+            let attempts = 0;
+            const maxAttempts = 15;
+            
+            const checkInterval = setInterval(() => {
+                attempts++;
+                debugLog(`Attempt ${attempts}/${maxAttempts} - Checking MetaMask...`);
+                
+                if (typeof window.ethereum !== 'undefined') {
+                    debugLog('✅ MetaMask detected after waiting!');
+                    clearInterval(checkInterval);
+                    checkMetaMask();
+                } else if (attempts >= maxAttempts) {
+                    debugLog('❌ MetaMask still not detected after ' + maxAttempts + ' attempts');
+                    clearInterval(checkInterval);
+                    showMetaMaskTroubleshooting();
+                }
+            }, 1000);
+        }
+        
+        function showMetaMaskTroubleshooting() {
+            showStatus(`
+                <strong>MetaMask Not Detected</strong><br><br>
+                <strong>Troubleshooting Steps:</strong><br>
+                1. 📌 Pin MetaMask extension to toolbar<br>
+                2. 🔄 Refresh this page<br>
+                3. 🌐 Try: <code>python -m http.server 8000</code><br>
+                4. 🔧 Check: <code>chrome://extensions/</code><br>
+                5. 🦊 Reinstall MetaMask if needed<br><br>
+                <a href="https://metamask.io/download/" target="_blank" style="color: #fff; text-decoration: underline;">
+                    Download MetaMask
+                </a><br><br>
+                <button onclick="location.reload()" style="background: #fff; color: #000; border: 1px solid #fff; padding: 8px 16px; cursor: pointer;">
+                    🔄 Refresh Page
+                </button>
+            `, 'error');
+        }
+        
+        function updateConnectionUI(canConnect) {
+            const connectBtn = document.getElementById('connectWallet');
+            if (canConnect) {
+                connectBtn.disabled = false;
+                connectBtn.textContent = 'Connect Wallet';
+                debugLog('✅ Connection UI enabled');
+            } else {
+                connectBtn.disabled = true;
+                connectBtn.textContent = 'MetaMask Not Found';
+                debugLog('❌ Connection UI disabled');
+            }
+        }
+
+        // 🎯 检查合约状态
+        async function checkContractStatus() {
+            try {
+                debugLog('Checking contract status with enhanced tracking...');
+                
+                // Base Sepolia 检查
+                const baseProvider = new ethers.providers.JsonRpcProvider('https://base-sepolia.g.alchemy.com/v2/Q10nyLpSsNHWgrhBaWwmg');
+                const baseContract = new ethers.Contract(BASE_SEPOLIA_CONFIG.contractAddress, CONTRACT_ABI, baseProvider);
+                const baseMessages = await baseContract.messageCount();
+                const baseNFTs = await baseContract.totalSupply();
+                
+                debugLog(`✅ Base Sepolia: ${baseMessages} messages, ${baseNFTs} NFTs`);
+                
+                // Ethereum Sepolia 检查
+                const ethNetwork = {
+                    name: 'sepolia',
+                    chainId: 11155111,
+                    ensAddress: null
+                };
+                const ethProvider = new ethers.providers.JsonRpcProvider({
+                    url: 'https://eth-sepolia.g.alchemy.com/v2/Q10nyLpSsNHWgrhBaWwmg',
+                    allowGzip: true
+                }, ethNetwork);
+                
+                const ethContract = new ethers.Contract(ETHEREUM_SEPOLIA_CONFIG.contractAddress, CONTRACT_ABI, ethProvider);
+                const ethMessages = await ethContract.messageCount();
+                const ethNFTs = await ethContract.totalSupply();
+                
+                debugLog(`✅ Ethereum Sepolia: ${ethMessages} messages, ${ethNFTs} NFTs`);
+                
+                document.getElementById('contractStatus').innerHTML = 
+                    `✅ Base: ${baseMessages} msgs, ${baseNFTs} NFTs | Eth: ${ethMessages} msgs, ${ethNFTs} NFTs`;
+                
+            } catch (error) {
+                document.getElementById('contractStatus').innerHTML = '❌ Connection Error';
+                debugLog('❌ Contract status check failed: ' + error.message);
+            }
+        }
+
+        // Connect Wallet
+        async function connectWallet() {
+            if (isConnecting) {
+                debugLog('⚠️ Connection already in progress, skipping...');
+                return;
+            }
+
+            if (typeof window.ethereum === 'undefined') {
+                showStatus('Please install MetaMask wallet!', 'error');
+                debugLog('❌ MetaMask not installed');
+                return;
+            }
+
+            isConnecting = true;
+            const connectBtn = document.getElementById('connectWallet');
+            const originalText = connectBtn.textContent;
+            
+            try {
+                debugLog('Connect button clicked');
+                connectBtn.disabled = true;
+                connectBtn.textContent = 'Connecting...';
+                
+                const accountsPromise = window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Connection timeout')), 30000);
+                });
+                
+                const accounts = await Promise.race([accountsPromise, timeoutPromise]);
+                
+                if (!accounts || accounts.length === 0) {
+                    throw new Error('No accounts returned from MetaMask');
+                }
+
+                debugLog(`✅ Connected to account: ${accounts[0]}`);
+                
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                
+                const address = await signer.getAddress();
+                const network = await provider.getNetwork();
+                
+                debugLog(`Network: ${network.name || 'Unknown'} (Chain ID: ${network.chainId})`);
+                
+                document.getElementById('walletAddress').textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+                document.getElementById('walletInfo').style.display = 'block';
+                document.getElementById('connectWallet').style.display = 'none';
+                
+                if (network.chainId !== BASE_CHAIN_ID) {
+                    debugLog(`Wrong network (${network.chainId}), switching to Base Sepolia...`);
+                    await switchToBaseSepolia();
+                    
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    
+                    const newNetwork = await provider.getNetwork();
+                    debugLog(`New network: ${newNetwork.name || 'Unknown'} (Chain ID: ${newNetwork.chainId})`);
+                    
+                    if (newNetwork.chainId !== BASE_CHAIN_ID) {
+                        throw new Error(`Failed to switch to Base Sepolia. Current network: ${newNetwork.chainId}`);
+                    }
+                }
+                
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                debugLog('✅ Contract initialized with enhanced ABI: ' + CONTRACT_ADDRESS);
+                
+                showStatus('Wallet connected successfully! ✨', 'success');
+                loadMessages();
+                
+            } catch (error) {
+                debugLog('❌ Connection failed: ' + error.message);
+                
+                let errorMsg = error.message;
+                if (error.code === 4001) {
+                    errorMsg = 'User rejected the connection request';
+                } else if (error.code === -32002) {
+                    errorMsg = 'Request already pending. Please check MetaMask.';
+                } else if (error.message.includes('already pending')) {
+                    errorMsg = 'Request already pending. Please wait or refresh the page.';
+                } else if (error.message.includes('timeout')) {
+                    errorMsg = 'Connection timeout. Please try again.';
+                }
+                
+                showStatus('Failed to connect: ' + errorMsg, 'error');
+                connectBtn.disabled = false;
+                connectBtn.textContent = originalText;
+                
+            } finally {
+                isConnecting = false;
+            }
+        }
+
+        async function switchToBaseSepolia() {
+            try {
+                debugLog('Attempting to switch to Base Sepolia...');
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: `0x${BASE_CHAIN_ID.toString(16)}` }],
+                });
+                debugLog('✅ Successfully switched to Base Sepolia');
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+            } catch (switchError) {
+                debugLog('Switch error: ' + switchError.message);
+                
+                if (switchError.code === 4902) {
+                    debugLog('Base Sepolia network not found, adding...');
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: `0x${BASE_CHAIN_ID.toString(16)}`,
+                                chainName: 'Base Sepolia',
+                                nativeCurrency: {
+                                    name: 'ETH',
+                                    symbol: 'ETH',
+                                    decimals: 18,
+                                },
+                                rpcUrls: ['https://sepolia.base.org'],
+                                blockExplorerUrls: ['https://sepolia.basescan.org'],
+                            }],
+                        });
+                        debugLog('✅ Base Sepolia network added and switched');
+                        
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        
+                    } catch (addError) {
+                        debugLog('❌ Failed to add Base Sepolia network: ' + addError.message);
+                        throw new Error('Failed to add Base Sepolia network. Please add it manually in MetaMask.');
+                    }
+                } else if (switchError.code === 4001) {
+                    throw new Error('User rejected network switch. Please switch to Base Sepolia manually.');
+                } else {
+                    throw switchError;
+                }
+            }
+        }
+
+        document.getElementById('connectWallet').addEventListener('click', connectWallet);
+
+        document.querySelectorAll('.emotion-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedEmotion = btn.dataset.emotion;
+                checkFormComplete();
+            });
+        });
+
+        document.getElementById('messageContent').addEventListener('input', (e) => {
+            const charCount = e.target.value.length;
+            document.getElementById('charCount').textContent = charCount;
+            checkFormComplete();
+        });
+
+        function checkFormComplete() {
+            const content = document.getElementById('messageContent').value.trim();
+            const sendBtn = document.getElementById('sendMessage');
+            
+            if (selectedEmotion && content && signer && contract) {
+                sendBtn.disabled = false;
+            } else {
+                sendBtn.disabled = true;
+            }
+        }
+
+        // send message
+        document.getElementById('sendMessage').addEventListener('click', async () => {
+            try {
+                const content = document.getElementById('messageContent').value.trim();
+                
+                if (!selectedEmotion || !content) {
+                    showStatus('Please select a resonance type and write your message', 'error');
+                    return;
+                }
+
+                if (!contract) {
+                    showStatus('Please connect your wallet first', 'error');
+                    return;
+                }
+
+                showStatus('Illuminating across chains... <span class="loading">✨</span>', 'loading');
+
+                const recipient = ETHEREUM_SEPOLIA_CONFIG.contractAddress;
+                
+                debugLog(`Target recipient: ${recipient}`);
+                debugLog(`Destination domain: ${SEPOLIA_DOMAIN}`);
+                const recipientBytes32 = ethers.utils.hexZeroPad(recipient, 32);
+
+                const gasPayment = ethers.utils.parseEther("0.002");
+                
+                debugLog(`Sending illuminate transaction with gas: ${gasPayment.toString()}`);
+                debugLog(`Content: "${content}"`);
+                debugLog(`Resonance: "${selectedEmotion}"`);
+
+                const tx = await contract.illuminate(
+                    SEPOLIA_DOMAIN,
+                    recipientBytes32,
+                    content,
+                    selectedEmotion,
+                    { value: gasPayment }
+                );
+
+                debugLog(`Transaction sent: ${tx.hash}`);
+                showStatus('Light transmitted, awaiting confirmation... <span class="loading">⏳</span>', 'loading');
+                
+                const receipt = await tx.wait();
+                debugLog(`Transaction confirmed in block: ${receipt.blockNumber}`);
+                
+                showStatus(`Luminous message illuminated successfully! ✨<br>
+                    <small>Tx: <a href="https://sepolia.basescan.org/tx/${receipt.transactionHash}" target="_blank" style="color: #fff;">${receipt.transactionHash.slice(0, 8)}...</a></small><br>
+                    <small>NFT will be minted upon cross-chain confirmation on Ethereum Sepolia.</small>`, 'success');
+                
+                // 清空表单
+                document.getElementById('messageContent').value = '';
+                document.getElementById('messageTag').value = '';
+                document.getElementById('charCount').textContent = '0';
+                document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('active'));
+                selectedEmotion = '';
+                checkFormComplete();
+                
+                // refresh messages
+                setTimeout(loadMessages, 3000);
+                
+            } catch (error) {
+                console.error('Send failed:', error);
+                let errorMsg = error.message;
+                if (error.code === 'INSUFFICIENT_FUNDS') {
+                    errorMsg = 'Insufficient ETH for gas fees. Get test ETH from Base Sepolia faucet.';
+                } else if (error.code === 'USER_REJECTED') {
+                    errorMsg = 'Transaction rejected by user.';
+                }
+                showStatus('Send failed: ' + errorMsg, 'error');
+                debugLog('❌ Send failed: ' + errorMsg);
+            }
+        });
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.className = `status ${type}`;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.innerHTML = '';
+                    statusDiv.className = '';
+                }, 10000);
+            }
+        }
+
+        async function loadMessages() {
+            try {
+                if (!signer) return;
+                
+                const userAddress = await signer.getAddress();
+                debugLog(`Loading messages with enhanced transaction tracking for user: ${userAddress}`);
+                
+                debugLog('Using simplified tracking due to API limitations');
+                
+                const baseProvider = new ethers.providers.JsonRpcProvider('https://base-sepolia.g.alchemy.com/v2/Q10nyLpSsNHWgrhBaWwmg');
+                const baseContract = new ethers.Contract(BASE_SEPOLIA_CONFIG.contractAddress, CONTRACT_ABI, baseProvider);
+                
+                let baseMessages = [];
+                let baseSendEvents = [];
+                try {
+                    baseMessages = await baseContract.getAllLights();
+                    debugLog(`✅ Loaded ${baseMessages.length} messages from Base Sepolia`);
+                    
+                    const sendFilter = baseContract.filters.LightSent();
+                    try {
+                        const latestBlock = await baseProvider.getBlockNumber();
+                        const fromBlock = Math.max(latestBlock - 400, 0); 
+                        const toBlock = latestBlock; // 明确指定结束区块
+                        baseSendEvents = await baseContract.queryFilter(sendFilter, fromBlock, toBlock);
+                        debugLog(`✅ Found ${baseSendEvents.length} send events on Base (blocks ${fromBlock}-${toBlock})`);
+                    } catch (eventError) {
+                        debugLog(`Failed to load send events: ${eventError.message}`);
+                        baseSendEvents = [];
+                    }
+                } catch (baseError) {
+                    debugLog(`Failed to load Base messages: ${baseError.message}`);
+                }
+                
+                // 从 Ethereum Sepolia 加载消息和接收/铸造事件
+                let ethMessages = [];
+                let ethReceiveEvents = [];
+                let nftMintEvents = [];
+                try {
+                    const ethNetwork = {
+                        name: 'sepolia',
+                        chainId: 11155111,
+                        ensAddress: null
+                    };
+                    const ethProvider = new ethers.providers.JsonRpcProvider({
+                        url: 'https://eth-sepolia.g.alchemy.com/v2/Q10nyLpSsNHWgrhBaWwmg',
+                        allowGzip: true
+                    }, ethNetwork);
+                    
+                    const ethContract = new ethers.Contract(ETHEREUM_SEPOLIA_CONFIG.contractAddress, CONTRACT_ABI, ethProvider);
+                    ethMessages = await ethContract.getAllLights();
+                    debugLog(`✅ Loaded ${ethMessages.length} messages from Ethereum Sepolia`);
+                    
+                    // 获取Ethereum上的接收事件 - 修复区块范围限制
+                    const receiveFilter = ethContract.filters.LightReceived();
+                    try {
+                        const latestBlock = await ethProvider.getBlockNumber();
+                        const fromBlock = Math.max(latestBlock - 400, 0);
+                        const toBlock = latestBlock;
+                        ethReceiveEvents = await ethContract.queryFilter(receiveFilter, fromBlock, toBlock);
+                        debugLog(`✅ Found ${ethReceiveEvents.length} receive events on Ethereum (blocks ${fromBlock}-${toBlock})`);
+                    } catch (eventError) {
+                        debugLog(`Failed to load receive events: ${eventError.message}`);
+                        ethReceiveEvents = [];
+                    }
+                    
+                    // 获取NFT铸造事件 - 修复区块范围限制
+                    const mintFilter = ethContract.filters.CommemorativeNFTMinted();
+                    try {
+                        const latestBlock = await ethProvider.getBlockNumber();
+                        const fromBlock = Math.max(latestBlock - 400, 0);
+                        const toBlock = latestBlock;
+                        nftMintEvents = await ethContract.queryFilter(mintFilter, fromBlock, toBlock);
+                        debugLog(`✅ Found ${nftMintEvents.length} NFT mint events on Ethereum (blocks ${fromBlock}-${toBlock})`);
+                    } catch (eventError) {
+                        debugLog(`Failed to load mint events: ${eventError.message}`);
+                        nftMintEvents = [];
+                    }
+                    
+                } catch (ethError) {
+                    debugLog(`Failed to load Ethereum messages: ${ethError.message}`);
+                }
+                
+                const messagesList = document.getElementById('messagesList');
+                let displayMessages = [];
+                
+                for (let i = 0; i < baseMessages.length; i++) {
+                    const baseMsg = baseMessages[i];
+                    
+                    // 查找对应的Base发送事件交易哈希
+                    const baseSendEvent = baseSendEvents.find(event => 
+                        event.args && 
+                        event.args.messageId && 
+                        event.args.messageId.toNumber() === i
+                    );
+                    const baseSendTxHash = baseSendEvent ? baseSendEvent.transactionHash : null;
+                    
+                    // 查找对应的Ethereum消息和事件
+                    const matchingEthMsg = ethMessages.find(ethMsg => 
+                        ethMsg.content === baseMsg.content && 
+                        ethMsg.sender.toLowerCase() === baseMsg.sender.toLowerCase() &&
+                        Math.abs(ethMsg.timestamp - baseMsg.timestamp) < 3600
+                    );
+                    
+                    let ethReceiveTransactionHash = null;
+                    let nftMintTransactionHash = null;
+                    let nftTokenId = 0;
+                    let hasConfirmedNFT = false;
+                    
+                    if (matchingEthMsg && matchingEthMsg.nftTokenId > 0) {
+                        hasConfirmedNFT = true;
+                        nftTokenId = matchingEthMsg.nftTokenId;
+                        
+                        // 查找对应的接收事件交易哈希
+                        const ethReceiveEvent = ethReceiveEvents.find(event => 
+                            event.args && 
+                            event.args.sender && 
+                            event.args.sender.toLowerCase() === baseMsg.sender.toLowerCase()
+                        );
+                        ethReceiveTransactionHash = ethReceiveEvent ? ethReceiveEvent.transactionHash : null;
+                        
+                        // 查找对应的NFT铸造事件交易哈希
+                        const nftMintEvent = nftMintEvents.find(event => 
+                            event.args && 
+                            event.args.tokenId && 
+                            event.args.tokenId.toString() === nftTokenId.toString()
+                        );
+                        nftMintTransactionHash = nftMintEvent ? nftMintEvent.transactionHash : null;
+                        
+                        debugLog(`✅ Found complete transaction chain for message ${i}:`);
+                        debugLog(`  Base send: ${baseSendTxHash}`);
+                        debugLog(`  Eth receive: ${ethReceiveTransactionHash}`);
+                        debugLog(`  NFT mint: ${nftMintTransactionHash}`);
+                    }
+                    
+                    displayMessages.push({
+                        ...baseMsg,
+                        messageIndex: i,
+                        isConfirmed: hasConfirmedNFT || baseMsg.crossChainConfirmed,
+                        confirmedNFTId: nftTokenId,
+                        baseTxHash: baseSendTxHash,
+                        ethReceiveTxHash: ethReceiveTransactionHash,
+                        nftMintTxHash: nftMintTransactionHash,
+                        // 备用显示模式标志
+                        useSimpleDisplay: baseSendEvents.length === 0 && ethReceiveEvents.length === 0
+                    });
+                }
+                
+                if (displayMessages.length === 0) {
+                    messagesList.innerHTML = '<p style="text-align: center; color: #666666;">No luminous messages yet...</p>';
+                    return;
+                }
+
+                const resonanceNames = {
+                    'love': 'LOVE',
+                    'bliss': 'BLISS',
+                    'serenity': 'SERENITY',
+                    'luminosity': 'LUMINOSITY',
+                    'eternity': 'ETERNITY',
+                    'grace': 'GRACE'
+                };
+
+                // 按时间戳排序，最新的在前
+                displayMessages.sort((a, b) => b.timestamp - a.timestamp);
+
+                messagesList.innerHTML = displayMessages.map(msg => {
+                    const statusDisplay = msg.isConfirmed ? 
+                        '<span style="color: #00ff00; margin-left: 10px;">✅ COMPLETED</span>' : 
+                        '<span style="color: #ffff00; margin-left: 10px;">⏳ PENDING</span>';
+                    
+                    const nftDisplay = msg.confirmedNFTId > 0 ? 
+                        `<span style="color: #ffffff; margin-left: 10px;">🎨 NFT #${msg.confirmedNFTId} minted</span>` : '';
+                    
+                                        // 🎯 Messages区域 - 只显示Base Send
+                    let messageTransactionLinks = '';
+                    let transactionLinks = '';
+                    
+                    // 只显示Base Send链接
+                    messageTransactionLinks += `<br><small style="color: #888; margin-top: 5px; display: block;">
+                        📤 Base Send: <a href="https://sepolia.basescan.org/address/${BASE_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00aaff; text-decoration: underline;">View on Base Explorer</a>
+                    </small>`;
+                    
+                    // 总是尝试显示可用的交易哈希
+                    if (msg.baseTxHash) {
+                        transactionLinks += `<br><small style="color: #888; margin-top: 5px; display: block;">
+                            📤 Base Send: <a href="https://sepolia.basescan.org/tx/${msg.baseTxHash}" target="_blank" style="color: #00aaff; text-decoration: underline;">${msg.baseTxHash.slice(0, 8)}...${msg.baseTxHash.slice(-6)}</a>
+                        </small>`;
+                    } else {
+                        // 如果没有具体的Base交易哈希，显示通用Base链接
+                        transactionLinks += `<br><small style="color: #888; margin-top: 5px; display: block;">
+                            📤 Base Send: <a href="https://sepolia.basescan.org/address/${BASE_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00aaff; text-decoration: underline;">View on Base Explorer</a>
+                        </small>`;
+                    }
+                    
+                    if (msg.ethReceiveTxHash) {
+                        // 检查是否 Receive 和 NFT Mint 是同一个交易
+                        if (msg.nftMintTxHash && msg.ethReceiveTxHash === msg.nftMintTxHash) {
+                            // 合并显示：接收消息和铸造NFT在同一个交易中
+                            transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
+                                📥🎨 Eth Receive & NFT Mint: <a href="https://sepolia.etherscan.io/tx/${msg.ethReceiveTxHash}" target="_blank" style="color: #00ff88; text-decoration: underline;">${msg.ethReceiveTxHash.slice(0, 8)}...${msg.ethReceiveTxHash.slice(-6)}</a>
+                            </small>`;
+                        } else {
+                            // 分别显示
+                            transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
+                                📥 Eth Receive: <a href="https://sepolia.etherscan.io/tx/${msg.ethReceiveTxHash}" target="_blank" style="color: #00ff88; text-decoration: underline;">${msg.ethReceiveTxHash.slice(0, 8)}...${msg.ethReceiveTxHash.slice(-6)}</a>
+                            </small>`;
+                            
+                            // 如果有不同的NFT铸造交易，显示它
+                            if (msg.nftMintTxHash && msg.nftMintTxHash !== msg.ethReceiveTxHash) {
+                                transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
+                                    🎨 NFT Mint: <a href="https://sepolia.etherscan.io/tx/${msg.nftMintTxHash}" target="_blank" style="color: #00ff88; text-decoration: underline;">${msg.nftMintTxHash.slice(0, 8)}...${msg.nftMintTxHash.slice(-6)}</a>
+                                </small>`;
+                            }
+                        }
+                    } else if (msg.isConfirmed) {
+                        // 如果消息已确认但没有具体交易哈希
+                        transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
+                            📥 Eth Receive: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00ff88; text-decoration: underline;">View on Ethereum</a>
+                        </small>`;
+                    }
+                    
+                    // NFT信息显示
+                    if (msg.confirmedNFTId > 0 && !msg.nftMintTxHash) {
+                        transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
+                            🎨 NFT #${msg.confirmedNFTId}: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #ffffff; text-decoration: underline;">View NFT Details</a>
+                        </small>`;
+                    }
+                    
+                    if (msg.useSimpleDisplay) {
+                        // 简化显示模式：只显示通用链接
+                        transactionLinks += `<br><small style="color: #888; margin-top: 5px; display: block;">
+                            📤 View on Base: <a href="https://sepolia.basescan.org/address/${BASE_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00aaff; text-decoration: underline;">Block Explorer</a>
+                        </small>`;
+                        
+                        if (msg.isConfirmed) {
+                            transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
+                                📥 View on Ethereum: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00ff88; text-decoration: underline;">Block Explorer</a>
+                            </small>`;
+                        }
+                    } else {
+                        // 完整显示模式：显示具体交易哈希
+                        if (msg.baseTxHash) {
+                            transactionLinks += `<br><small style="color: #888; margin-top: 5px; display: block;">
+                                📤 Base Send: <a href="https://sepolia.basescan.org/tx/${msg.baseTxHash}" target="_blank" style="color: #00aaff; text-decoration: underline;">${msg.baseTxHash.slice(0, 8)}...${msg.baseTxHash.slice(-6)}</a>
+                            </small>`;
+                        }
+                        if (msg.ethReceiveTxHash) {
+                            transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
+                                📥 Eth Receive: <a href="https://sepolia.etherscan.io/tx/${msg.ethReceiveTxHash}" target="_blank" style="color: #00ff88; text-decoration: underline;">${msg.ethReceiveTxHash.slice(0, 8)}...${msg.ethReceiveTxHash.slice(-6)}</a>
+                            </small>`;
+                        } else if (msg.isConfirmed) {
+                            transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
+                                📥 Eth Receive: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #fff; text-decoration: underline;">View on Ethereum</a>
+                            </small>`;
+                        }
+                    }
+                    
+                    // NFT信息显示
+                    if (msg.confirmedNFTId > 0 && !msg.nftMintTxHash) {
+                        transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
+                            🎨 NFT #${msg.confirmedNFTId}: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00ff88; text-decoration: underline;">View NFT</a>
+                        </small>`;
+                    }
+                    
+                    return `
+                        <div class="message-card" style="${msg.isConfirmed ? 'border-left: 3px solid #00ff00;' : 'border-left: 3px solid #ffff00;'}">
+                            <div class="message-header">
+                                <span class="emotion-tag">
+                                    ${resonanceNames[msg.resonance] || msg.resonance.toUpperCase()}
+                                </span>
+                                <span class="message-time">
+                                    ${new Date(msg.timestamp * 1000).toLocaleString()}
+                                </span>
+                            </div>
+                            <div class="message-content">"${msg.content}"</div>
+                            <div style="margin-top: 10px; font-size: 10px; color: #666666; text-transform: uppercase; letter-spacing: 1px;">
+                                FROM: ${msg.sender.slice(0, 6)}...${msg.sender.slice(-4)}
+                                <span style="color: #ffffff; margin-left: 10px;">BASE→ETH</span>
+                                ${statusDisplay}
+                                ${nftDisplay}
+                                ${messageTransactionLinks}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // 加载NFTs
+                await loadUserNFTsFromBothChains(userAddress, nftMintEvents);
+                
+            } catch (error) {
+                console.error('Failed to load messages:', error);
+                debugLog('❌ Failed to load messages: ' + error.message);
+            }
+        }
+        
+        async function loadUserNFTsFromBothChains(userAddress, existingMintEvents = []) {
+            try {
+                if (!userAddress) return;
+                
+                const nftsList = document.getElementById('nftsList');
+                
+                // 从 Base Sepolia 加载NFTs和转移事件
+                let baseNFTIds = [];
+                let baseContract;
+                let baseTransferEvents = [];
+                try {
+                    const baseProvider = new ethers.providers.JsonRpcProvider('https://base-sepolia.g.alchemy.com/v2/Q10nyLpSsNHWgrhBaWwmg');
+                    baseContract = new ethers.Contract(BASE_SEPOLIA_CONFIG.contractAddress, CONTRACT_ABI, baseProvider);
+                    baseNFTIds = await baseContract.getUserNFTs(userAddress);
+                    debugLog(`✅ Loaded ${baseNFTIds.length} NFTs from Base Sepolia`);
+                    
+                    // 获取Base上的NFT转移事件 - 修复区块范围限制
+                    if (baseNFTIds.length > 0) {
+                        const transferFilter = baseContract.filters.Transfer(null, userAddress, null);
+                        try {
+                            const latestBlock = await baseProvider.getBlockNumber();
+                            const fromBlock = Math.max(latestBlock - 400, 0);
+                            const toBlock = latestBlock;
+                            baseTransferEvents = await baseContract.queryFilter(transferFilter, fromBlock, toBlock);
+                            debugLog(`✅ Found ${baseTransferEvents.length} transfer events on Base (blocks ${fromBlock}-${toBlock})`);
+                        } catch (eventError) {
+                            debugLog(`Failed to load Base transfer events: ${eventError.message}`);
+                            baseTransferEvents = [];
+                        }
+                    }
+                } catch (baseError) {
+                    debugLog(`Failed to load Base NFTs: ${baseError.message}`);
+                }
+                
+                // 从 Ethereum Sepolia 加载NFTs和转移事件
+                let ethNFTIds = [];
+                let ethContract = null;
+                let ethTransferEvents = [];
+                try {
+                    const ethNetwork = {
+                        name: 'sepolia',
+                        chainId: 11155111,
+                        ensAddress: null
+                    };
+                    const ethProvider = new ethers.providers.JsonRpcProvider({
+                        url: 'https://eth-sepolia.g.alchemy.com/v2/Q10nyLpSsNHWgrhBaWwmg',
+                        allowGzip: true
+                    }, ethNetwork);
+                    
+                    ethContract = new ethers.Contract(ETHEREUM_SEPOLIA_CONFIG.contractAddress, CONTRACT_ABI, ethProvider);
+                    ethNFTIds = await ethContract.getUserNFTs(userAddress);
+                    debugLog(`✅ Loaded ${ethNFTIds.length} NFTs from Ethereum Sepolia`);
+                    
+                    // 获取Ethereum上的NFT转移事件 - 修复区块范围限制
+                    if (ethNFTIds.length > 0) {
+                        const transferFilter = ethContract.filters.Transfer(null, userAddress, null);
+                        try {
+                            const latestBlock = await ethProvider.getBlockNumber();
+                            const fromBlock = Math.max(latestBlock - 400, 0);
+                            const toBlock = latestBlock;
+                            ethTransferEvents = await ethContract.queryFilter(transferFilter, fromBlock, toBlock);
+                            debugLog(`✅ Found ${ethTransferEvents.length} transfer events on Ethereum (blocks ${fromBlock}-${toBlock})`);
+                        } catch (eventError) {
+                            debugLog(`Failed to load Ethereum transfer events: ${eventError.message}`);
+                            ethTransferEvents = [];
+                        }
+                    }
+                } catch (ethError) {
+                    debugLog(`Failed to load Ethereum NFTs: ${ethError.message}`);
+                }
+                
+                const totalNFTs = baseNFTIds.length + ethNFTIds.length;
+                
+                if (totalNFTs === 0) {
+                    nftsList.innerHTML = '<p style="text-align: center; color: #666666;">No commemorative NFTs yet... Send a cross-chain message to mint one! ✨</p>';
+                    return;
+                }
+
+                let nftsHTML = '';
+                
+                // 处理Base Sepolia NFTs
+                for (let i = 0; i < baseNFTIds.length; i++) {
+                    const tokenId = baseNFTIds[i];
+                    try {
+                        const tokenURI = await baseContract.tokenURI(tokenId);
+                        const base64Json = tokenURI.split(',')[1];
+                        const metadata = JSON.parse(atob(base64Json));
+                        
+                        // 🎯 Base NFT - 如果有Base NFT，显示简单信息
+                        const baseTransactionLink = `<br><small style="color: #888; margin-top: 5px; display: block;">
+                            🎨 NFT on Base: <a href="https://sepolia.basescan.org/address/${BASE_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #ff9900; text-decoration: underline;">View on Base Explorer</a>
+                        </small>`;
+                        
+                        nftsHTML += `
+                            <div class="message-card" style="border-left: 3px solid #ff9900;">
+                                <div class="message-header">
+                                    <span class="emotion-tag" style="background: #ffffff; color: #000000;">
+                                        🎨 NFT #${tokenId}
+                                    </span>
+                                    <span class="message-time">
+                                        ${metadata.attributes.find(attr => attr.trait_type === 'Resonance')?.value || 'UNKNOWN'}
+                                    </span>
+                                </div>
+                                <div class="message-content">${metadata.description}</div>
+                                <div style="margin-top: 10px; font-size: 10px; color: #ffffff; text-transform: uppercase; letter-spacing: 1px;">
+                                    COMMEMORATIVE CROSS-CHAIN NFT | BASE SEPOLIA
+                                    ${baseTransactionLink}
+                                </div>
+                            </div>
+                        `;
+                    } catch (error) {
+                        console.error(`Error loading Base NFT ${tokenId}:`, error);
+                        nftsHTML += `
+                            <div class="message-card">
+                                <div class="message-header">
+                                    <span class="emotion-tag">🎨 NFT #${tokenId}</span>
+                                    <span class="message-time">Base Sepolia</span>
+                                </div>
+                                <div class="message-content">Failed to load NFT metadata</div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                // 处理Ethereum Sepolia NFTs
+                if (ethContract && ethNFTIds.length > 0) {
+                    for (let i = 0; i < ethNFTIds.length; i++) {
+                        const tokenId = ethNFTIds[i];
+                        try {
+                            const tokenURI = await ethContract.tokenURI(tokenId);
+                            const base64Json = tokenURI.split(',')[1];
+                            const metadata = JSON.parse(atob(base64Json));
+                            
+                            // 查找对应的转移事件交易哈希
+                            const transferEvent = ethTransferEvents.find(event => 
+                                event.args && 
+                                event.args.tokenId && 
+                                event.args.tokenId.toString() === tokenId.toString()
+                            );
+                            const transferTxHash = transferEvent ? transferEvent.transactionHash : null;
+                            
+                            // 查找对应的铸造事件交易哈希
+                            const mintEvent = existingMintEvents.find(event => 
+                                event.args && 
+                                event.args.tokenId && 
+                                event.args.tokenId.toString() === tokenId.toString()
+                            );
+                            const mintTxHash = mintEvent ? mintEvent.transactionHash : null;
+                            
+                        // 🎯 NFT区域 - 显示Eth Receive & NFT Mint交易哈希
+                        let ethNftTransactionLinks = '';
+                        
+                        // 查找对应的铸造事件交易哈希
+                        const nftMintEventForToken = existingMintEvents.find(event => 
+                            event.args && 
+                            event.args.tokenId && 
+                            event.args.tokenId.toString() === tokenId.toString()
+                        );
+                        const nftMintTransactionHashForToken = nftMintEventForToken ? nftMintEventForToken.transactionHash : null;
+                        
+                        if (nftMintTransactionHashForToken) {
+                            ethNftTransactionLinks = `<br><small style="color: #888; margin-top: 5px; display: block;">
+                                🎨 Eth Receive & NFT Mint: <a href="https://sepolia.etherscan.io/tx/${nftMintTransactionHashForToken}" target="_blank" style="color: #00ff88; text-decoration: underline;">${nftMintTransactionHashForToken.slice(0, 8)}...${nftMintTransactionHashForToken.slice(-6)}</a>
+                            </small>`;
+                        } else {
+                            ethNftTransactionLinks = `<br><small style="color: #888; margin-top: 5px; display: block;">
+                                🎨 Eth Receive & NFT Mint: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00ff88; text-decoration: underline;">View on Eth Explorer</a>
+                            </small>`;
+                        }
+                            
+                            nftsHTML += `
+                                <div class="message-card" style="border-left: 3px solid #00ff88;">
+                                    <div class="message-header">
+                                        <span class="emotion-tag" style="background: #ffffff; color: #000000;">
+                                            🎨 NFT #${tokenId}
+                                        </span>
+                                        <span class="message-time">
+                                            ${metadata.attributes.find(attr => attr.trait_type === 'Resonance')?.value || 'UNKNOWN'}
+                                        </span>
+                                    </div>
+                                    <div class="message-content">${metadata.description}</div>
+                                    <div style="margin-top: 10px; font-size: 10px; color: #ffffff; text-transform: uppercase; letter-spacing: 1px;">
+                                        COMMEMORATIVE CROSS-CHAIN NFT | ETHEREUM SEPOLIA
+                                        ${ethNftTransactionLinks}
+                                    </div>
+                                </div>
+                            `;
+                        } catch (error) {
+                            console.error(`Error loading Ethereum NFT ${tokenId}:`, error);
+                            nftsHTML += `
+                                <div class="message-card">
+                                    <div class="message-header">
+                                        <span class="emotion-tag">🎨 NFT #${tokenId}</span>
+                                        <span class="message-time">Ethereum Sepolia</span>
+                                    </div>
+                                    <div class="message-content">Failed to load NFT metadata</div>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+                
+                nftsList.innerHTML = nftsHTML;
+                debugLog(`✅ Loaded total ${totalNFTs} NFTs with transaction tracking (${baseNFTIds.length} from Base, ${ethNFTIds.length} from Ethereum)`);
+                
+            } catch (error) {
+                console.error('Failed to load NFTs from both chains:', error);
+                debugLog('❌ Failed to load NFTs: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
