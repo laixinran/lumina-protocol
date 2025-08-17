@@ -1021,10 +1021,10 @@
                     const nftDisplay = msg.confirmedNFTId > 0 ? 
                         `<span style="color: #ffffff; margin-left: 10px;">🎨 NFT #${msg.confirmedNFTId} minted</span>` : '';
                     
-                    // 🎯 Messages区域 - 显示交易链接
+                    // 🎯 Messages区域 - 只显示Base Send交易
                     let transactionLinks = '';
                     
-                    // 总是尝试显示可用的交易哈希
+                    // 只显示Base Send交易哈希
                     if (msg.baseTxHash) {
                         transactionLinks += `<br><small style="color: #888; margin-top: 5px; display: block;">
                             📤 Base Send: <a href="https://sepolia.basescan.org/tx/${msg.baseTxHash}" target="_blank" style="color: #00aaff; text-decoration: underline;">${msg.baseTxHash.slice(0, 8)}...${msg.baseTxHash.slice(-6)}</a>
@@ -1033,40 +1033,6 @@
                         // 如果没有具体的Base交易哈希，显示通用Base链接
                         transactionLinks += `<br><small style="color: #888; margin-top: 5px; display: block;">
                             📤 Base Send: <a href="https://sepolia.basescan.org/address/${BASE_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00aaff; text-decoration: underline;">View on Base Explorer</a>
-                        </small>`;
-                    }
-                    
-                    if (msg.ethReceiveTxHash) {
-                        // 检查是否 Receive 和 NFT Mint 是同一个交易
-                        if (msg.nftMintTxHash && msg.ethReceiveTxHash === msg.nftMintTxHash) {
-                            // 合并显示：接收消息和铸造NFT在同一个交易中
-                            transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
-                                📥🎨 Eth Receive & NFT Mint: <a href="https://sepolia.etherscan.io/tx/${msg.ethReceiveTxHash}" target="_blank" style="color: #00ff88; text-decoration: underline;">${msg.ethReceiveTxHash.slice(0, 8)}...${msg.ethReceiveTxHash.slice(-6)}</a>
-                            </small>`;
-                        } else {
-                            // 分别显示
-                            transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
-                                📥 Eth Receive: <a href="https://sepolia.etherscan.io/tx/${msg.ethReceiveTxHash}" target="_blank" style="color: #00ff88; text-decoration: underline;">${msg.ethReceiveTxHash.slice(0, 8)}...${msg.ethReceiveTxHash.slice(-6)}</a>
-                            </small>`;
-                            
-                            // 如果有不同的NFT铸造交易，显示它
-                            if (msg.nftMintTxHash && msg.nftMintTxHash !== msg.ethReceiveTxHash) {
-                                transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
-                                    🎨 NFT Mint: <a href="https://sepolia.etherscan.io/tx/${msg.nftMintTxHash}" target="_blank" style="color: #00ff88; text-decoration: underline;">${msg.nftMintTxHash.slice(0, 8)}...${msg.nftMintTxHash.slice(-6)}</a>
-                                </small>`;
-                            }
-                        }
-                    } else if (msg.isConfirmed) {
-                        // 如果消息已确认但没有具体交易哈希
-                        transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
-                            📥 Eth Receive: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00ff88; text-decoration: underline;">View on Ethereum</a>
-                        </small>`;
-                    }
-                    
-                    // NFT信息显示
-                    if (msg.confirmedNFTId > 0 && !msg.nftMintTxHash) {
-                        transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
-                            🎨 NFT #${msg.confirmedNFTId}: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #ffffff; text-decoration: underline;">View NFT Details</a>
                         </small>`;
                     }
                     
