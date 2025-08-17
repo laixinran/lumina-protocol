@@ -320,8 +320,6 @@
             <div><strong>STATUS:</strong> <span id="contractStatus">Checking...</span></div>
         </div>
 
-        <!-- Debug信息已移除，界面更简洁 -->
-
         <div class="chain-info">
             <div>
                 <strong>SOURCE CHAIN:</strong> <span class="chain-badge">Base Sepolia</span>
@@ -360,18 +358,6 @@
                 ></textarea>
                 <small style="color: #666666;">Max 280 characters | <span id="charCount">0</span>/280</small>
             </div>
-            <!--
-            <div class="form-group">
-                <label for="messageTag">Message Tag (Optional):</label>
-                <input 
-                    type="text" 
-                    id="messageTag" 
-                    placeholder="Add a personal tag or note for this message..."
-                    maxlength="50"
-                >
-                <small style="color: #666666;">Personal reference only - not stored on blockchain</small>
-            </div>
-        -->
 
             <button id="sendMessage" class="send-button" disabled>
                 Illuminate
@@ -400,17 +386,17 @@
         let selectedEmotion = '';
         let isConnecting = false;
         
-       
+        // 🎯 更新后的跨链配置 - 使用你部署成功的地址
         const BASE_SEPOLIA_CONFIG = {
             chainId: 84532,
-            contractAddress: "0x5b254C65D9A640cDF74f52D08BA88EF880Edb69D", // Base Sepolia
+            contractAddress: "0x5b254C65D9A640cDF74f52D08BA88EF880Edb69D", // ✅ 你的Base Sepolia地址
             mailboxAddress: "0x6966b0E55883d49BFB24539356a2f8A673E02039",
             domain: 84532
         };
         
         const ETHEREUM_SEPOLIA_CONFIG = {
             chainId: 11155111,
-            contractAddress: "0x7742eE5b44B54A63E4aCadb37Ca217786003A4fC", // Ethereum Sepolia
+            contractAddress: "0x7742eE5b44B54A63E4aCadb37Ca217786003A4fC", // ✅ 你的Ethereum Sepolia地址
             mailboxAddress: "0xfFAEF09B3cd11D9b20d1a19bECca54EEC2884766",
             domain: 11155111
         };
@@ -442,12 +428,13 @@
             "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
         ];
 
-        
+        // 简化版本 - 移除调试信息
         function debugLog(message) {
+            // 调试信息已禁用，如需调试请取消注释下行
             // console.log('LUMINA:', message);
         }
 
-        
+        // 页面加载时检查合约状态
         window.addEventListener('load', async () => {
             debugLog('Page loaded - Lumina Protocol Enhanced Version');
             
@@ -601,7 +588,7 @@
             }
         }
 
-        // Connect Wallet
+        // 连接钱包
         async function connectWallet() {
             if (isConnecting) {
                 debugLog('⚠️ Connection already in progress, skipping...');
@@ -695,6 +682,7 @@
             }
         }
 
+        // 切换到Base Sepolia网络
         async function switchToBaseSepolia() {
             try {
                 debugLog('Attempting to switch to Base Sepolia...');
@@ -744,6 +732,7 @@
 
         document.getElementById('connectWallet').addEventListener('click', connectWallet);
 
+        // 情感选择
         document.querySelectorAll('.emotion-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('active'));
@@ -753,6 +742,7 @@
             });
         });
 
+        // 监听消息内容变化
         document.getElementById('messageContent').addEventListener('input', (e) => {
             const charCount = e.target.value.length;
             document.getElementById('charCount').textContent = charCount;
@@ -770,7 +760,7 @@
             }
         }
 
-        // send message
+        // 🎯 发送消息
         document.getElementById('sendMessage').addEventListener('click', async () => {
             try {
                 const content = document.getElementById('messageContent').value.trim();
@@ -787,6 +777,7 @@
 
                 showStatus('Illuminating across chains... <span class="loading">✨</span>', 'loading');
 
+                // 🎯 简化：总是发送到Ethereum Sepolia合约
                 const recipient = ETHEREUM_SEPOLIA_CONFIG.contractAddress;
                 
                 debugLog(`Target recipient: ${recipient}`);
@@ -819,13 +810,12 @@
                 
                 // 清空表单
                 document.getElementById('messageContent').value = '';
-                document.getElementById('messageTag').value = '';
                 document.getElementById('charCount').textContent = '0';
                 document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('active'));
                 selectedEmotion = '';
                 checkFormComplete();
                 
-                // refresh messages
+                // 刷新消息列表
                 setTimeout(loadMessages, 3000);
                 
             } catch (error) {
@@ -854,6 +844,7 @@
             }
         }
 
+        // 🎯 加载消息 - 增强交易哈希显示
         async function loadMessages() {
             try {
                 if (!signer) return;
@@ -861,8 +852,10 @@
                 const userAddress = await signer.getAddress();
                 debugLog(`Loading messages with enhanced transaction tracking for user: ${userAddress}`);
                 
+                // 🎯 简化版本：专注于消息和NFT状态，事件查询作为增强功能
                 debugLog('Using simplified tracking due to API limitations');
                 
+                // 从 Base Sepolia 加载消息和发送事件
                 const baseProvider = new ethers.providers.JsonRpcProvider('https://base-sepolia.g.alchemy.com/v2/Q10nyLpSsNHWgrhBaWwmg');
                 const baseContract = new ethers.Contract(BASE_SEPOLIA_CONFIG.contractAddress, CONTRACT_ABI, baseProvider);
                 
@@ -872,10 +865,11 @@
                     baseMessages = await baseContract.getAllLights();
                     debugLog(`✅ Loaded ${baseMessages.length} messages from Base Sepolia`);
                     
+                    // 获取Base上的发送事件 - 修复区块范围限制
                     const sendFilter = baseContract.filters.LightSent();
                     try {
                         const latestBlock = await baseProvider.getBlockNumber();
-                        const fromBlock = Math.max(latestBlock - 400, 0); 
+                        const fromBlock = Math.max(latestBlock - 400, 0); // 使用400而不是500，留点余量
                         const toBlock = latestBlock; // 明确指定结束区块
                         baseSendEvents = await baseContract.queryFilter(sendFilter, fromBlock, toBlock);
                         debugLog(`✅ Found ${baseSendEvents.length} send events on Base (blocks ${fromBlock}-${toBlock})`);
@@ -936,6 +930,7 @@
                     debugLog(`Failed to load Ethereum messages: ${ethError.message}`);
                 }
                 
+                // 🎯 构建完整的跨链交易信息 - 只显示Base->Eth消息
                 const messagesList = document.getElementById('messagesList');
                 let displayMessages = [];
                 
@@ -1026,14 +1021,8 @@
                     const nftDisplay = msg.confirmedNFTId > 0 ? 
                         `<span style="color: #ffffff; margin-left: 10px;">🎨 NFT #${msg.confirmedNFTId} minted</span>` : '';
                     
-                                        // 🎯 Messages区域 - 只显示Base Send
-                    let messageTransactionLinks = '';
+                    // 🎯 Messages区域 - 显示交易链接
                     let transactionLinks = '';
-                    
-                    // 只显示Base Send链接
-                    messageTransactionLinks += `<br><small style="color: #888; margin-top: 5px; display: block;">
-                        📤 Base Send: <a href="https://sepolia.basescan.org/address/${BASE_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00aaff; text-decoration: underline;">View on Base Explorer</a>
-                    </small>`;
                     
                     // 总是尝试显示可用的交易哈希
                     if (msg.baseTxHash) {
@@ -1081,42 +1070,6 @@
                         </small>`;
                     }
                     
-                    if (msg.useSimpleDisplay) {
-                        // 简化显示模式：只显示通用链接
-                        transactionLinks += `<br><small style="color: #888; margin-top: 5px; display: block;">
-                            📤 View on Base: <a href="https://sepolia.basescan.org/address/${BASE_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00aaff; text-decoration: underline;">Block Explorer</a>
-                        </small>`;
-                        
-                        if (msg.isConfirmed) {
-                            transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
-                                📥 View on Ethereum: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00ff88; text-decoration: underline;">Block Explorer</a>
-                            </small>`;
-                        }
-                    } else {
-                        // 完整显示模式：显示具体交易哈希
-                        if (msg.baseTxHash) {
-                            transactionLinks += `<br><small style="color: #888; margin-top: 5px; display: block;">
-                                📤 Base Send: <a href="https://sepolia.basescan.org/tx/${msg.baseTxHash}" target="_blank" style="color: #00aaff; text-decoration: underline;">${msg.baseTxHash.slice(0, 8)}...${msg.baseTxHash.slice(-6)}</a>
-                            </small>`;
-                        }
-                        if (msg.ethReceiveTxHash) {
-                            transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
-                                📥 Eth Receive: <a href="https://sepolia.etherscan.io/tx/${msg.ethReceiveTxHash}" target="_blank" style="color: #00ff88; text-decoration: underline;">${msg.ethReceiveTxHash.slice(0, 8)}...${msg.ethReceiveTxHash.slice(-6)}</a>
-                            </small>`;
-                        } else if (msg.isConfirmed) {
-                            transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
-                                📥 Eth Receive: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #fff; text-decoration: underline;">View on Ethereum</a>
-                            </small>`;
-                        }
-                    }
-                    
-                    // NFT信息显示
-                    if (msg.confirmedNFTId > 0 && !msg.nftMintTxHash) {
-                        transactionLinks += `<small style="color: #888; margin-top: 2px; display: block;">
-                            🎨 NFT #${msg.confirmedNFTId}: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00ff88; text-decoration: underline;">View NFT</a>
-                        </small>`;
-                    }
-                    
                     return `
                         <div class="message-card" style="${msg.isConfirmed ? 'border-left: 3px solid #00ff00;' : 'border-left: 3px solid #ffff00;'}">
                             <div class="message-header">
@@ -1133,7 +1086,7 @@
                                 <span style="color: #ffffff; margin-left: 10px;">BASE→ETH</span>
                                 ${statusDisplay}
                                 ${nftDisplay}
-                                ${messageTransactionLinks}
+                                ${transactionLinks}
                             </div>
                         </div>
                     `;
@@ -1148,6 +1101,7 @@
             }
         }
         
+        // 🎯 从两个链加载用户NFTs - 增强交易哈希显示
         async function loadUserNFTsFromBothChains(userAddress, existingMintEvents = []) {
             try {
                 if (!userAddress) return;
@@ -1281,42 +1235,26 @@
                             const base64Json = tokenURI.split(',')[1];
                             const metadata = JSON.parse(atob(base64Json));
                             
-                            // 查找对应的转移事件交易哈希
-                            const transferEvent = ethTransferEvents.find(event => 
-                                event.args && 
-                                event.args.tokenId && 
-                                event.args.tokenId.toString() === tokenId.toString()
-                            );
-                            const transferTxHash = transferEvent ? transferEvent.transactionHash : null;
+                            // 🎯 NFT区域 - 显示Eth Receive & NFT Mint交易哈希
+                            let ethNftTransactionLinks = '';
                             
                             // 查找对应的铸造事件交易哈希
-                            const mintEvent = existingMintEvents.find(event => 
+                            const nftMintEventForToken = existingMintEvents.find(event => 
                                 event.args && 
                                 event.args.tokenId && 
                                 event.args.tokenId.toString() === tokenId.toString()
                             );
-                            const mintTxHash = mintEvent ? mintEvent.transactionHash : null;
+                            const nftMintTransactionHashForToken = nftMintEventForToken ? nftMintEventForToken.transactionHash : null;
                             
-                        // 🎯 NFT区域 - 显示Eth Receive & NFT Mint交易哈希
-                        let ethNftTransactionLinks = '';
-                        
-                        // 查找对应的铸造事件交易哈希
-                        const nftMintEventForToken = existingMintEvents.find(event => 
-                            event.args && 
-                            event.args.tokenId && 
-                            event.args.tokenId.toString() === tokenId.toString()
-                        );
-                        const nftMintTransactionHashForToken = nftMintEventForToken ? nftMintEventForToken.transactionHash : null;
-                        
-                        if (nftMintTransactionHashForToken) {
-                            ethNftTransactionLinks = `<br><small style="color: #888; margin-top: 5px; display: block;">
-                                🎨 Eth Receive & NFT Mint: <a href="https://sepolia.etherscan.io/tx/${nftMintTransactionHashForToken}" target="_blank" style="color: #00ff88; text-decoration: underline;">${nftMintTransactionHashForToken.slice(0, 8)}...${nftMintTransactionHashForToken.slice(-6)}</a>
-                            </small>`;
-                        } else {
-                            ethNftTransactionLinks = `<br><small style="color: #888; margin-top: 5px; display: block;">
-                                🎨 Eth Receive & NFT Mint: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00ff88; text-decoration: underline;">View on Eth Explorer</a>
-                            </small>`;
-                        }
+                            if (nftMintTransactionHashForToken) {
+                                ethNftTransactionLinks = `<br><small style="color: #888; margin-top: 5px; display: block;">
+                                    🎨 Eth Receive & NFT Mint: <a href="https://sepolia.etherscan.io/tx/${nftMintTransactionHashForToken}" target="_blank" style="color: #00ff88; text-decoration: underline;">${nftMintTransactionHashForToken.slice(0, 8)}...${nftMintTransactionHashForToken.slice(-6)}</a>
+                                </small>`;
+                            } else {
+                                ethNftTransactionLinks = `<br><small style="color: #888; margin-top: 5px; display: block;">
+                                    🎨 Eth Receive & NFT Mint: <a href="https://sepolia.etherscan.io/address/${ETHEREUM_SEPOLIA_CONFIG.contractAddress}" target="_blank" style="color: #00ff88; text-decoration: underline;">View on Eth Explorer</a>
+                                </small>`;
+                            }
                             
                             nftsHTML += `
                                 <div class="message-card" style="border-left: 3px solid #00ff88;">
