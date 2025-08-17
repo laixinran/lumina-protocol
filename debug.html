@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina Debug</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+</head>
+<body style="background: black; color: white; font-family: Arial; padding: 20px;">
+    <h1>LUMINA DEBUG</h1>
+    
+    <div id="debug-info">
+        <p>Checking MetaMask...</p>
+    </div>
+    
+    <button id="connectWallet" style="padding: 15px; font-size: 16px; margin: 10px;">
+        Connect Wallet
+    </button>
+    
+    <div id="wallet-info" style="margin-top: 20px;"></div>
+    
+    <script>
+        // 调试信息
+        function log(message) {
+            console.log(message);
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.innerHTML += '<p>' + message + '</p>';
+        }
+        
+        // 检查环境
+        window.addEventListener('load', () => {
+            log('Page loaded');
+            log('window.ethereum exists: ' + (typeof window.ethereum !== 'undefined'));
+            log('ethers loaded: ' + (typeof ethers !== 'undefined'));
+            
+            if (typeof window.ethereum !== 'undefined') {
+                log('MetaMask detected!');
+                log('Ethereum provider: ' + window.ethereum.isMetaMask);
+            } else {
+                log('❌ MetaMask not detected');
+            }
+        });
+        
+        // 连接钱包 - 简化版本
+        document.getElementById('connectWallet').addEventListener('click', async () => {
+            log('Connect button clicked');
+            
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    log('❌ MetaMask not installed');
+                    alert('Please install MetaMask');
+                    return;
+                }
+                
+                log('Requesting accounts...');
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                log('Accounts received: ' + accounts.length);
+                log('Account 0: ' + accounts[0]);
+                
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const address = await signer.getAddress();
+                const network = await provider.getNetwork();
+                
+                log('✅ Connected successfully!');
+                log('Address: ' + address);
+                log('Network: ' + network.name + ' (Chain ID: ' + network.chainId + ')');
+                
+                document.getElementById('wallet-info').innerHTML = `
+                    <h3>Wallet Connected</h3>
+                    <p><strong>Address:</strong> ${address}</p>
+                    <p><strong>Network:</strong> ${network.name} (${network.chainId})</p>
+                `;
+                
+            } catch (error) {
+                log('❌ Connection failed: ' + error.message);
+                console.error('Full error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
