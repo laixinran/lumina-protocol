@@ -7,12 +7,12 @@ Cross-chain luminous messaging with commemorative NFTs via Hyperlane
 Lumina Protocol is a cross-chain social communication platform that enables users to send emotionally-resonant messages across different blockchain networks while automatically minting commemorative NFTs upon successful delivery. Built on Hyperlane's interoperability infrastructure, Lumina transforms traditional messaging into a meaningful, permanent, and cross-chain social experience that connects communities across blockchain boundaries.
 Features
 
-🌉 Cross-Chain Messaging: Send messages from Base Sepolia to Ethereum Sepolia using Hyperlane
-💫 Emotional Resonance: Choose from 6 resonance types (Love, Bliss, Serenity, Luminosity, Eternity, Grace)
-🎨 Automatic NFT Minting: Commemorative NFTs are automatically minted on the destination chain
-✅ Bidirectional Confirmation: Automatic confirmation system verifies message delivery
-🔗 Permanent Storage: All messages and metadata stored entirely on-chain
-🖤 Minimalist Design: Clean, terminal-inspired interface focusing on meaningful communication
+- 🌉 Cross-Chain Messaging: Send messages from Base Sepolia to Ethereum Sepolia using Hyperlane
+- 💫 Emotional Resonance: Choose from 6 resonance types (Love, Bliss, Serenity, Luminosity, Eternity, Grace)
+- 🎨 Automatic NFT Minting: Commemorative NFTs are automatically minted on the destination chain
+- ✅ Bidirectional Confirmation: Automatic confirmation system verifies message delivery
+- 🔗 Permanent Storage: All messages and metadata stored entirely on-chain
+- 🖤 Minimalist Design: Clean, terminal-inspired interface focusing on meaningful communication
 
 ## How It Works
 
